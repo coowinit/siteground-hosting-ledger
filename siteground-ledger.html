@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>SiteGround 主机台账</title>
+<style>
+  :root {
+    color-scheme: light;
+    font: 15px/1.5 "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    --ink: #1c2a37;
+    --muted: #526474;
+    --line: #dbe3e9;
+    --primary: #2457cb;
+    --canvas: #f2f5f8;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; color: var(--ink); background: var(--canvas); }
+  main { max-width: 1260px; margin: auto; padding: 42px 28px; }
+  h1 { margin: 0; font-size: clamp(25px, 4vw, 36px); letter-spacing: -.02em; }
+  h2 { margin: 0; font-size: 20px; }
+  p { margin: 0; }
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: default; opacity: .48; }
+  button:focus-visible, input:focus-visible, select:focus-visible, .table-scroll:focus-visible {
+    outline: 3px solid #6790ee; outline-offset: 2px;
+  }
+  .header, .toolbar, .actions, .dialog-footer {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .header, .toolbar { justify-content: space-between; }
+  .header p { color: var(--muted); margin-top: 7px; }
+  .button {
+    background: white; border: 1px solid #cbd6df; padding: 8px 14px;
+    border-radius: 8px; color: var(--ink); font-weight: 600;
+  }
+  .button:hover:enabled { background: #edf3fb; }
+  .button.primary { background: var(--primary); border-color: var(--primary); color: white; }
+  .button.primary:hover:enabled { background: #1746b2; }
+  nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0 16px; }
+  .section-tab {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    text-align: left; padding: 14px 16px; border: 1px solid var(--line);
+    border-radius: 10px; background: white; color: var(--muted); font-weight: 650;
+  }
+  .section-tab[aria-pressed="true"] { border-color: var(--primary); color: #204fb9; background: #eaf1ff; }
+  .count { font-size: 19px; font-variant-numeric: tabular-nums; }
+  .panel { background: white; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .toolbar { padding: 18px; }
+  input, select {
+    min-width: 0; border: 1px solid #cbd6df; border-radius: 7px;
+    padding: 8px 10px; color: var(--ink); background: white;
+  }
+  #search { width: min(100%, 245px); }
+  .filters {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px;
+    padding: 0 18px 14px; color: var(--muted);
+  }
+  .filters[hidden] { display: none; }
+  .filters label[hidden] { display: none; }
+  .filters label { display: flex; align-items: center; gap: 6px; }
+  .filter-summary { font-size: 13px; color: var(--muted); }
+  .table-scroll { overflow-x: auto; }
+  tr.group td { background: #edf3fb; color: #284569; font-weight: 650; white-space: normal; }
+  .related-list { list-style: none; margin: 0 0 6px; padding: 0; font-size: 14px; }
+  .related-list li + li { margin-top: 3px; }
+  .record-link { text-align: left; padding-inline: 0; margin: 0; }
+  .payment-preview { font-size: 14px; margin-bottom: 4px; }
+  .payment-date { color: var(--muted); }
+  .main-record td { padding-block: 15px; }
+  .main-record td:first-child { font-weight: 650; }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th, td { padding: 12px 16px; border-top: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+  th { background: #f7f9fc; color: #415568; font-size: 13px; white-space: nowrap; }
+  td { min-width: 100px; max-width: 260px; }
+  td:last-child { white-space: nowrap; width: 112px; }
+  td.empty { padding: 28px 18px; text-align: center; color: var(--muted); }
+  .row-action {
+    border: 0; background: transparent; color: #204fb9; padding: 2px 3px;
+    margin-right: 5px; font-size: 14px;
+  }
+  .row-action:hover { text-decoration: underline; }
+  .ciphertext-cell, .ciphertext-control {
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .ciphertext-value { min-width: 0; overflow-wrap: anywhere; font-family: monospace; }
+  .ciphertext-control input { flex: 1; min-width: 0; }
+  .eye-button {
+    flex: none; display: inline-grid; place-items: center; width: 32px; height: 30px;
+    border: 1px solid var(--line); border-radius: 6px; background: white; color: var(--primary);
+    font-size: 17px; line-height: 1;
+  }
+  .eye-button:hover, .eye-button[aria-pressed="true"] { background: #eaf1ff; }
+  #fields .ciphertext-control label { flex: 1; min-width: 0; }
+  #fields .ciphertext-control .eye-button { align-self: flex-end; margin-bottom: 5px; }
+  #fields .field-hint { font-weight: 400; color: var(--muted); }
+  .row-action.remove { color: #9e2f33; }
+  #status { padding: 10px 2px; color: var(--muted); min-height: 42px; }
+  #status.error, #form-error { color: #9e2f33; }
+  dialog {
+    border: 1px solid var(--line); border-radius: 14px; padding: 22px;
+    width: min(520px, 94vw); max-height: 90vh; color: var(--ink);
+  }
+  dialog::backdrop { background: rgba(17, 31, 48, .52); }
+  #fields { display: grid; gap: 12px; margin: 16px 0; }
+  #fields label { display: grid; gap: 4px; font-weight: 600; }
+  #fields label span { font-size: 14px; }
+  #fields input[readonly] { background: var(--canvas); }
+  .dialog-footer { justify-content: flex-end; margin-top: 16px; }
+  @media (max-width: 650px) {
+    main { padding: 22px 12px; }
+    nav { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 16px; }
+    .section-tab, .toolbar { padding: 11px; }
+    th, td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="header">
+    <div>
+      <h1>SiteGround 主机台账</h1>
+      <p>编辑后保存在当前浏览器。更换浏览器或电脑时，用 JSON 备份恢复。</p>
+    </div>
+    <div class="actions">
+      <button class="button" type="button" id="import">导入 JSON</button>
+      <button class="button" type="button" id="export">导出 JSON</button>
+      <input type="file" id="backup-file" accept=".json,application/json" hidden>
+    </div>
+  </header>
+  <nav id="sections" aria-label="台账分类"></nav>
+  <section class="panel" aria-labelledby="section-title">
+    <div class="toolbar">
+      <h2 id="section-title" tabindex="-1"></h2>
+      <div class="actions">
+        <input id="search" type="search" aria-label="搜索当前列表" placeholder="搜索当前列表">
+        <button class="button primary" type="button" id="add"></button>
+      </div>
+    </div>
+    <div class="filters" id="filters">
+      <label id="account-filter-label">账号 <select id="account-filter"></select></label>
+      <label id="plan-filter-label">主机套餐 <select id="plan-filter"></select></label>
+      <button class="row-action" type="button" id="reset-filter" hidden>清除筛选</button>
+      <span class="filter-summary" id="filter-summary" role="status"></span>
+    </div>
+    <div class="table-scroll" tabindex="0" aria-label="记录表格">
+      <table aria-labelledby="section-title">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </section>
+  <p id="status" role="status"></p>
+</main>
+<dialog id="editor" aria-labelledby="editor-title">
+  <form id="entry-form">
+    <h2 id="editor-title"></h2>
+    <div id="fields"></div>
+    <p id="form-error" role="alert"></p>
+    <div class="dialog-footer">
+      <button class="button" type="button" id="cancel">取消</button>
+      <button class="button primary" type="submit">保存</button>
+    </div>
+  </form>
+</dialog>
+<script>
+'use strict';
+
+const storageKey = 'siteground-ledger.v1';
+const sections = {
+  accounts: {
+    title: '账号总览', noun: '账号', key: 'code',
+    fields: [
+      { name: 'code', label: '账号编号', type: 'code', required: true, placeholder: 'SG-01' },
+      { name: 'email', label: '登录邮箱', type: 'email', required: true },
+      { name: 'company', label: '登记公司' },
+      { name: 'phone', label: '登记电话', type: 'tel' },
+      { name: 'encryptedPassword', label: '加密密码', type: 'ciphertext' }
+    ]
+  },
+  plans: {
+    title: '主机总览', noun: '套餐', key: 'code',
+    fields: [
+      { name: 'code', label: '套餐编号', type: 'code', required: true, placeholder: 'SG-01-P01' },
+      { name: 'account', label: '所属账号', ref: 'accounts', required: true },
+      { name: 'name', label: '套餐名称', required: true },
+      { name: 'expiry', label: '到期日', type: 'date', required: true }
+    ],
+    sort: (a, b) => a.expiry.localeCompare(b.expiry)
+  },
+  websites: {
+    title: '网站清单', noun: '网站', key: 'domain',
+    fields: [
+      { name: 'domain', label: '域名', type: 'domain', required: true, placeholder: 'example.com' },
+      { name: 'plan', label: '所属套餐', ref: 'plans', required: true }
+    ]
+  },
+  payments: {
+    title: '付款记录', noun: '付款记录',
+    fields: [
+      { name: 'date', label: '付款日期', type: 'date', required: true },
+      { name: 'plan', label: '所属套餐', ref: 'plans', required: true },
+      { name: 'kind', label: '交易类型', options: ['首次购买', '续费', '其他'], required: true },
+      { name: 'term', label: '购买周期', placeholder: '1 年' },
+      { name: 'amount', label: '实付金额', type: 'number', required: true },
+      { name: 'currency', label: '币种', type: 'currency', required: true, initial: 'USD' },
+      { name: 'invoice', label: '发票编号或归档位置' }
+    ],
+    sort: (a, b) => b.date.localeCompare(a.date)
+  }
+};
+
+const sectionNames = Object.keys(sections);
+const byId = id => document.getElementById(id);
+const form = byId('entry-form');
+const editor = byId('editor');
+let state = { version: 1, accounts: [], plans: [], websites: [], payments: [] };
+const viewOrder = ['plans', 'websites', 'payments', 'accounts'];
+let active = 'plans';
+let accountFilter = '';
+let planFilter = '';
+let editingIndex = -1;
+let loadError = false;
+let savedSnapshot = null;
+
+function element(tag, label) {
+  const node = document.createElement(tag);
+  if (label !== undefined) node.textContent = label;
+  return node;
+}
+
+function status(message, error = false) {
+  const node = byId('status');
+  node.textContent = message;
+  node.classList.toggle('error', error);
+}
+
+function normalizeField(field, value) {
+  if (field.type === 'number') {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 ||
+        value > 999999999.99 || value !== Number(value.toFixed(2))) {
+      throw new Error('实付金额须为非负数字，最多两位小数。');
+    }
+    return value;
+  }
+  if (typeof value !== 'string') throw new Error('“' + field.label + '”须为文本。');
+  if (field.type === 'ciphertext') {
+    if (value.length > 4096 || /[\r\n]/.test(value)) {
+      throw new Error('加密密码须为单行密文，最多 4096 个字符。');
+    }
+    return value.trim();
+  }
+  const text = value.trim();
+  if (field.required && !text) throw new Error('请填写“' + field.label + '”。');
+  const maxLength = field.type === 'domain' ? 253 : 250;
+  if (text.length > maxLength) throw new Error('“' + field.label + '”最多 ' + maxLength + ' 个字符。');
+  if (!text) return text;
+
+  switch (field.type) {
+    case 'code':
+      if (!/^[A-Z0-9][A-Z0-9-]{0,39}$/i.test(text)) throw new Error('编号可用字母、数字和连字符，最多 40 个字符。');
+      return text.toUpperCase();
+    case 'email':
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)) throw new Error('请填写有效的登录邮箱。');
+      break;
+    case 'domain':
+      if (!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(text)) {
+        throw new Error('请输入域名，例如 example.com。');
+      }
+      return text.toLowerCase();
+    case 'date': {
+      const date = new Date(text + 'T00:00:00Z');
+      if (!/^[1-9]\d{3}-\d{2}-\d{2}$/.test(text) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== text) {
+        throw new Error('“' + field.label + '”须为有效日期（YYYY-MM-DD）。');
+      }
+      break;
+    }
+    case 'currency':
+      if (!/^[A-Z]{3}$/i.test(text)) throw new Error('请填写三位币种代码，例如 USD。');
+      return text.toUpperCase();
+  }
+  if (field.options && !field.options.includes(text)) throw new Error('“' + field.label + '”选项无效。');
+  return field.ref ? text.toUpperCase() : text;
+}
+
+function validate(candidate) {
+  if (candidate?.version !== 1) throw new Error('请选择本台账导出的第 1 版 JSON 文件。');
+  const clean = { version: 1 };
+  for (const name of sectionNames) {
+    const config = sections[name];
+    if (!Array.isArray(candidate[name])) throw new Error('文件缺少“' + config.title + '”列表。');
+    const keys = new Set();
+    clean[name] = candidate[name].map((item, index) => {
+      try {
+        if (!item || typeof item !== 'object' || Array.isArray(item)) throw new Error('记录格式无效。');
+        const row = {};
+        for (const field of config.fields) {
+          row[field.name] = normalizeField(field, item[field.name] ?? '');
+          if (field.ref && !clean[field.ref].some(record => record.code === row[field.name])) {
+            throw new Error('找不到关联编号 ' + row[field.name] + '。');
+          }
+        }
+        if (config.key) {
+          const key = row[config.key];
+          if (keys.has(key)) throw new Error('存在重复记录 ' + key + '。');
+          keys.add(key);
+        }
+        return row;
+      } catch (error) {
+        throw new Error(config.title + '第 ' + (index + 1) + ' 条：' + error.message);
+      }
+    });
+  }
+  return clean;
+}
+
+function persist(next) {
+  const clean = validate(next);
+  let currentSnapshot;
+  try {
+    currentSnapshot = localStorage.getItem(storageKey);
+  } catch {
+    throw new Error('浏览器无法访问本地存储。请检查浏览器存储设置。');
+  }
+  if (currentSnapshot !== savedSnapshot) {
+    throw new Error('台账已在其他页面更新。请刷新本页后再操作。');
+  }
+  const serialized = JSON.stringify(clean);
+  try {
+    localStorage.setItem(storageKey, serialized);
+  } catch {
+    throw new Error('浏览器无法写入本地存储，数据未保存。请检查浏览器存储设置。');
+  }
+  savedSnapshot = serialized;
+  state = clean;
+  loadError = false;
+  render();
+}
+
+function displayField(field, row) {
+  const value = row[field.name];
+  if (value === '') return '—';
+  if (field.type === 'number') return value.toFixed(2);
+  if (field.ref === 'accounts') {
+    const account = state.accounts.find(record => record.code === value);
+    return value + ' · ' + account.email;
+  }
+  if (field.ref === 'plans') {
+    const plan = state.plans.find(record => record.code === value);
+    return value + ' · ' + plan.name;
+  }
+  return value;
+}
+
+function changeView(name, plan) {
+  active = name;
+  if (plan) planFilter = plan.code;
+  byId('search').value = '';
+  render();
+  byId('section-title').focus();
+}
+
+function fillFilter(select, records, allLabel, value, labelFor) {
+  const all = element('option', allLabel);
+  all.value = '';
+  select.replaceChildren(all);
+  for (const record of records) {
+    const option = element('option', labelFor(record));
+    option.value = record.code;
+    select.append(option);
+  }
+  select.value = value;
+}
+
+function renderFilters(grouped) {
+  if (!state.accounts.some(account => account.code === accountFilter)) accountFilter = '';
+  if (!state.plans.some(plan => plan.code === planFilter)) planFilter = '';
+
+  byId('filters').hidden = active === 'accounts';
+  byId('account-filter-label').hidden = active !== 'plans';
+  byId('plan-filter-label').hidden = !grouped;
+  byId('reset-filter').hidden = !(grouped ? planFilter : accountFilter);
+  if (grouped) {
+    fillFilter(byId('plan-filter'), state.plans, '全部主机', planFilter, row => row.code + ' · ' + row.name);
+  } else if (active === 'plans') {
+    fillFilter(byId('account-filter'), state.accounts, '全部账号', accountFilter, row => row.code);
+  }
+}
+
+function relatedButton(label, view, plan) {
+  const button = element('button', label);
+  button.type = 'button';
+  button.className = 'row-action record-link';
+  button.addEventListener('click', () => changeView(view, plan));
+  return button;
+}
+
+function planDetails(plan) {
+  const sites = state.websites.filter(site => site.plan === plan.code);
+  const payments = state.payments.filter(payment => payment.plan === plan.code);
+  const latest = payments.reduce((current, item) => !current || item.date > current.date ? item : current, null);
+  return { sites, payments, latest };
+}
+
+function websitePreview(plan, sites) {
+  const cell = element('td');
+  const list = element('ul');
+  list.className = 'related-list';
+  for (const site of sites.slice(0, 4)) list.append(element('li', site.domain));
+  if (sites.length) cell.append(list);
+  const label = sites.length > 4 ? '查看全部 ' + sites.length + ' 个网站' : sites.length + ' 个网站';
+  cell.append(relatedButton(label, 'websites', plan));
+  return cell;
+}
+
+function paymentPreview(plan, details) {
+  const cell = element('td');
+  const latest = details.latest;
+  if (latest) {
+    const preview = element('div');
+    preview.className = 'payment-preview';
+    const amount = element('strong', latest.currency + ' ' + latest.amount.toFixed(2));
+    const date = element('div', latest.date + ' · ' + latest.kind);
+    date.className = 'payment-date';
+    preview.append(amount, date);
+    cell.append(preview);
+  }
+  cell.append(relatedButton(details.payments.length + ' 笔付款', 'payments', plan));
+  return cell;
+}
+
+function eyeButton(toggleVisibility, accountCode = '') {
+  const button = element('button', '👁︎');
+  button.type = 'button';
+  button.className = 'eye-button';
+  button.title = '显示或隐藏加密密码';
+  button.setAttribute('aria-label', accountCode ? accountCode + ' 的加密密码可见性' : '加密密码可见性');
+  button.setAttribute('aria-pressed', 'false');
+  let visible = false;
+  button.addEventListener('click', () => {
+    visible = !visible;
+    toggleVisibility(visible);
+    button.setAttribute('aria-pressed', String(visible));
+  });
+  return button;
+}
+
+function ciphertextCell(account) {
+  const ciphertext = account.encryptedPassword;
+  if (!ciphertext) return element('td', '—');
+
+  const cell = element('td');
+  const wrapper = element('div');
+  wrapper.className = 'ciphertext-cell';
+  const value = element('span', '******');
+  value.className = 'ciphertext-value';
+  wrapper.append(value, eyeButton(visible => {
+    value.textContent = visible ? ciphertext : '******';
+  }, account.code));
+  cell.append(wrapper);
+  return cell;
+}
+
+function render() {
+  const config = sections[active];
+  const nav = byId('sections');
+  const previousTab = nav.contains(document.activeElement) ? document.activeElement.dataset.section : null;
+  nav.replaceChildren();
+  for (const name of viewOrder) {
+    const button = element('button', sections[name].title);
+    button.type = 'button';
+    button.className = 'section-tab';
+    button.dataset.section = name;
+    button.setAttribute('aria-pressed', name === active);
+    const count = element('span', state[name].length);
+    count.className = 'count';
+    button.append(count);
+    button.addEventListener('click', () => changeView(name));
+    nav.append(button);
+    if (name === previousTab) button.focus();
+  }
+
+  byId('section-title').textContent = config.title;
+  byId('add').textContent = '新增' + config.noun;
+  byId('add').disabled = loadError;
+  byId('export').disabled = loadError;
+  const isPlanView = active === 'plans';
+  const grouped = active === 'websites' || active === 'payments';
+  renderFilters(grouped);
+  const fields = config.fields.filter(field => !grouped || field.name !== 'plan');
+  const columns = fields.map(field => field.label);
+  if (isPlanView) columns.push('旗下网站', '最近付款');
+  columns.push('操作');
+  const header = element('tr');
+  for (const title of columns) {
+    const cell = element('th', title);
+    cell.scope = 'col';
+    header.append(cell);
+  }
+  byId('table-head').replaceChildren(header);
+
+  const planByCode = new Map(state.plans.map(plan => [plan.code, plan]));
+  const query = byId('search').value.trim().toLowerCase();
+  const rows = [];
+  for (const [index, row] of state[active].entries()) {
+    const plan = isPlanView ? row : grouped ? planByCode.get(row.plan) : null;
+    if (isPlanView && accountFilter && plan.account !== accountFilter) continue;
+    if (grouped && planFilter && row.plan !== planFilter) continue;
+    const values = fields.map(field => field.type === 'ciphertext' ? '' : displayField(field, row));
+    const details = isPlanView ? planDetails(row) : null;
+    const searchValues = [...values];
+    if (plan) searchValues.push(plan.account, plan.code, plan.name);
+    if (details) searchValues.push(...details.sites.map(site => site.domain));
+    if (query && !searchValues.some(value => String(value).toLowerCase().includes(query))) continue;
+    rows.push({ row, index, plan, values, details });
+  }
+  rows.sort((a, b) => {
+    if (grouped && a.plan.code !== b.plan.code) {
+      return a.plan.account.localeCompare(b.plan.account) || a.plan.code.localeCompare(b.plan.code);
+    }
+    return config.sort ? config.sort(a.row, b.row) : 0;
+  });
+  byId('filter-summary').textContent = '显示 ' + rows.length + ' 条';
+
+  const body = byId('table-body');
+  body.replaceChildren();
+  let previousPlan = '';
+  const groupCounts = new Map();
+  if (grouped) {
+    for (const { plan } of rows) groupCounts.set(plan.code, (groupCounts.get(plan.code) ?? 0) + 1);
+  }
+  for (const { row, index, plan, values, details } of rows) {
+    if (grouped && plan.code !== previousPlan) {
+      const group = element('tr');
+      group.className = 'group';
+      const count = groupCounts.get(plan.code);
+      const unit = active === 'websites' ? ' 个网站' : ' 笔付款';
+      const title = element('td', plan.code + ' · ' + plan.name + ' · 账号 ' + plan.account + ' · ' + count + unit);
+      title.colSpan = columns.length;
+      group.append(title);
+      body.append(group);
+      previousPlan = plan.code;
+    }
+    const tr = element('tr');
+    if (isPlanView) tr.className = 'main-record';
+    for (const [column, field] of fields.entries()) {
+      tr.append(field.type === 'ciphertext' ? ciphertextCell(row) : element('td', values[column]));
+    }
+    if (isPlanView) tr.append(websitePreview(plan, details.sites), paymentPreview(plan, details));
+    const tools = element('td');
+    const edit = element('button', '编辑');
+    const remove = element('button', '删除');
+    edit.type = remove.type = 'button';
+    edit.className = 'row-action';
+    remove.className = 'row-action remove';
+    edit.disabled = remove.disabled = loadError;
+    edit.addEventListener('click', () => openEditor(index));
+    remove.addEventListener('click', () => removeRow(index));
+    tools.append(edit, remove);
+    tr.append(tools);
+    body.append(tr);
+  }
+  if (!rows.length) {
+    const row = element('tr');
+    const message = loadError ? '请导入有效备份恢复台账。' :
+      sectionNames.every(name => state[name].length === 0) ? '台账暂无数据。可导入 JSON 备份，或在「账号总览」新增账号。' :
+      query || (isPlanView && accountFilter) || (grouped && planFilter)
+        ? '当前筛选范围暂无记录。' : '此列表暂无记录。';
+    const cell = element('td', message);
+    cell.colSpan = columns.length;
+    cell.className = 'empty';
+    row.append(cell);
+    body.append(row);
+  }
+}
+
+function buildControl(field, value, readonly) {
+  let control;
+  if (field.ref || field.options) {
+    control = element('select');
+    const placeholder = element('option', '请选择');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    control.append(placeholder);
+    const options = field.ref ? state[field.ref].map(row => ({
+      value: row.code, label: row.code + ' · ' + (row.email || row.name)
+    })) : field.options.map(option => ({ value: option, label: option }));
+    for (const item of options) {
+      const option = element('option', item.label);
+      option.value = item.value;
+      control.append(option);
+    }
+  } else {
+    control = element('input');
+    control.type = ['number', 'date', 'email', 'tel'].includes(field.type) ? field.type : 'text';
+    if (field.type === 'number') {
+      control.min = '0';
+      control.max = '999999999.99';
+      control.step = '0.01';
+    } else {
+      control.maxLength = field.type === 'domain' ? 253 : 250;
+    }
+    if (field.type === 'ciphertext') {
+      control.type = 'password';
+      control.maxLength = 4096;
+      control.autocomplete = 'off';
+      control.spellcheck = false;
+      control.placeholder = '粘贴已加密的单行密文';
+      control.setAttribute('aria-describedby', 'ciphertext-hint');
+    }
+    if (field.placeholder) control.placeholder = field.placeholder;
+    control.readOnly = readonly;
+  }
+  control.name = field.name;
+  control.required = Boolean(field.required);
+  control.value = value ?? field.initial ?? '';
+  return control;
+}
+
+function openEditor(index = -1) {
+  const config = sections[active];
+  const missing = config.fields.find(field => field.ref && state[field.ref].length === 0);
+  if (missing) {
+    status('请先到「' + sections[missing.ref].title + '」新增一条记录。', true);
+    return;
+  }
+  editingIndex = index;
+  const row = state[active][index];
+  byId('editor-title').textContent = (row ? '编辑' : '新增') + config.noun;
+  byId('form-error').textContent = '';
+  const fields = byId('fields');
+  fields.replaceChildren();
+  for (const field of config.fields) {
+    const label = element('label');
+    const fixedCode = Boolean(row && config.key === 'code' && field.name === 'code');
+    const defaultRef = field.ref === 'accounts' ? accountFilter : field.ref === 'plans' ? planFilter : undefined;
+    const control = buildControl(field, row?.[field.name] ?? (defaultRef || undefined), fixedCode);
+    label.append(element('span', field.label + (fixedCode ? '（固定编号）' : '')), control);
+    if (field.type === 'ciphertext') {
+      const wrapper = element('div');
+      wrapper.className = 'ciphertext-control';
+      wrapper.append(label, eyeButton(visible => { control.type = visible ? 'text' : 'password'; }));
+      const hint = element('p', '请粘贴已加密的密文。台账及 JSON 备份会按原样保存。');
+      hint.id = 'ciphertext-hint';
+      hint.className = 'field-hint';
+      fields.append(wrapper, hint);
+    } else {
+      fields.append(label);
+    }
+  }
+  editor.showModal();
+}
+
+function removeRow(index) {
+  const row = state[active][index];
+  if (active === 'accounts' && state.plans.some(plan => plan.account === row.code)) {
+    status('该账号仍有关联套餐。请先转移或删除对应套餐。', true);
+    return;
+  }
+  if (active === 'plans' && [...state.websites, ...state.payments].some(record => record.plan === row.code)) {
+    status('该套餐仍有关联网站或付款记录。请先处理关联记录。', true);
+    return;
+  }
+  const label = row.code || row.domain || row.date + ' · ' + row.amount.toFixed(2) + ' ' + row.currency;
+  if (!confirm('删除这条记录？\n' + label)) return;
+  const next = structuredClone(state);
+  next[active].splice(index, 1);
+  try {
+    persist(next);
+    status('记录已删除。');
+  } catch (error) {
+    status(error.message, true);
+  }
+}
+
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  const row = Object.fromEntries(new FormData(form));
+  if (active === 'payments') row.amount = Number(row.amount);
+  const next = structuredClone(state);
+  if (editingIndex < 0) next[active].push(row);
+  else next[active][editingIndex] = row;
+  try {
+    persist(next);
+    editor.close();
+    byId('add').focus();
+    status('记录已保存在当前浏览器。');
+  } catch (error) {
+    byId('form-error').textContent = error.message;
+  }
+});
+
+byId('cancel').addEventListener('click', () => editor.close());
+byId('add').addEventListener('click', () => openEditor());
+byId('search').addEventListener('input', render);
+byId('account-filter').addEventListener('change', event => {
+  accountFilter = event.target.value;
+  render();
+});
+byId('plan-filter').addEventListener('change', event => {
+  planFilter = event.target.value;
+  render();
+});
+byId('reset-filter').addEventListener('click', () => {
+  const overview = active === 'plans';
+  if (overview) accountFilter = '';
+  else planFilter = '';
+  byId('search').value = '';
+  render();
+  byId(overview ? 'account-filter' : 'plan-filter').focus();
+});
+byId('import').addEventListener('click', () => byId('backup-file').click());
+
+byId('backup-file').addEventListener('change', async event => {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  try {
+    let candidate;
+    try {
+      candidate = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
+    } catch {
+      throw new Error('文件无法读取为 JSON。');
+    }
+    const restored = validate(candidate);
+    const summary = sectionNames.map(name => sections[name].title + ' ' + restored[name].length + ' 条').join('、');
+    if (!confirm('此备份包含 ' + summary + '。\n导入会替换当前台账的全部记录。确认恢复？')) {
+      status('已取消导入。');
+      return;
+    }
+    persist(restored);
+    accountFilter = '';
+    planFilter = '';
+    byId('search').value = '';
+    render();
+    status('备份已恢复并保存在当前浏览器。');
+  } catch (error) {
+    status('导入失败。' + error.message, true);
+  }
+});
+
+byId('export').addEventListener('click', () => {
+  const backup = new Blob([JSON.stringify(state, null, 2) + '\n'], { type: 'application/json' });
+  const link = element('a');
+  const now = new Date();
+  const stamp = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const url = URL.createObjectURL(backup);
+  link.href = url;
+  link.download = 'siteground-ledger-' + stamp + '.json';
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  status('已发起 JSON 备份下载。文件包含台账中录入的账号资料。');
+});
+
+try {
+  savedSnapshot = localStorage.getItem(storageKey);
+  if (savedSnapshot !== null) state = validate(JSON.parse(savedSnapshot));
+} catch {
+  loadError = true;
+  status('无法读取本地台账。可以导入 JSON 备份恢复。', true);
+}
+render();
+</script>
+</body>
+</html>
