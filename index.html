@@ -108,6 +108,10 @@
   #fields label { display: grid; gap: 4px; font-weight: 600; }
   #fields label span { font-size: 14px; }
   #fields input[readonly] { background: var(--canvas); }
+  #storage-notice {
+    margin: 16px 0 0; padding: 11px 14px; border-radius: 8px;
+    color: #754500; background: #fff3dc; border: 1px solid #ead3a7;
+  }
   .dialog-footer { justify-content: flex-end; margin-top: 16px; }
   @media (max-width: 650px) {
     main { padding: 22px 12px; }
@@ -122,7 +126,7 @@
   <header class="header">
     <div>
       <h1>SiteGround 主机台账</h1>
-      <p>编辑后保存在当前浏览器。更换浏览器或电脑时，用 JSON 备份恢复。</p>
+      <p>浏览器允许时自动保存。更换浏览器或电脑时，用 JSON 备份恢复。</p>
     </div>
     <div class="actions">
       <button class="button" type="button" id="import">导入 JSON</button>
@@ -130,6 +134,7 @@
       <input type="file" id="backup-file" accept=".json,application/json" hidden>
     </div>
   </header>
+  <p id="storage-notice" role="status" hidden>浏览器无法保存到本地存储，当前为临时模式。刷新或关闭页面前，请先导出 JSON。</p>
   <nav id="sections" aria-label="台账分类"></nav>
   <section class="panel" aria-labelledby="section-title">
     <div class="toolbar">
@@ -224,6 +229,7 @@ let planFilter = '';
 let editingIndex = -1;
 let loadError = false;
 let savedSnapshot = null;
+let temporaryMode = false;
 
 function element(tag, label) {
   const node = document.createElement(tag);
@@ -316,24 +322,40 @@ function validate(candidate) {
   return clean;
 }
 
+function warnBeforeLeaving(event) {
+  event.preventDefault();
+  event.returnValue = true;
+}
+
 function persist(next) {
   const clean = validate(next);
-  let currentSnapshot;
-  try {
-    currentSnapshot = localStorage.getItem(storageKey);
-  } catch {
-    throw new Error('浏览器无法访问本地存储。请检查浏览器存储设置。');
+  if (!temporaryMode) {
+    let storage;
+    let currentSnapshot;
+    try {
+      storage = window.localStorage;
+      currentSnapshot = storage.getItem(storageKey);
+    } catch {
+      storage = null;
+    }
+    if (storage && currentSnapshot !== savedSnapshot) {
+      throw new Error('台账已在其他页面更新。请刷新本页后再操作。');
+    }
+    if (storage) {
+      const serialized = JSON.stringify(clean);
+      try {
+        storage.setItem(storageKey, serialized);
+        savedSnapshot = serialized;
+      } catch {
+        storage = null;
+      }
+    }
+    if (!storage) {
+      temporaryMode = true;
+      byId('storage-notice').hidden = false;
+      window.addEventListener('beforeunload', warnBeforeLeaving);
+    }
   }
-  if (currentSnapshot !== savedSnapshot) {
-    throw new Error('台账已在其他页面更新。请刷新本页后再操作。');
-  }
-  const serialized = JSON.stringify(clean);
-  try {
-    localStorage.setItem(storageKey, serialized);
-  } catch {
-    throw new Error('浏览器无法写入本地存储，数据未保存。请检查浏览器存储设置。');
-  }
-  savedSnapshot = serialized;
   state = clean;
   loadError = false;
   render();
@@ -669,7 +691,7 @@ function removeRow(index) {
   next[active].splice(index, 1);
   try {
     persist(next);
-    status('记录已删除。');
+    status(temporaryMode ? '当前页面中的记录已删除。请导出 JSON 保存更改。' : '记录已删除。');
   } catch (error) {
     status(error.message, true);
   }
@@ -686,7 +708,7 @@ form.addEventListener('submit', event => {
     persist(next);
     editor.close();
     byId('add').focus();
-    status('记录已保存在当前浏览器。');
+    status(temporaryMode ? '记录已暂存在当前页面。请导出 JSON 保存更改。' : '记录已保存在当前浏览器。');
   } catch (error) {
     byId('form-error').textContent = error.message;
   }
@@ -735,7 +757,7 @@ byId('backup-file').addEventListener('change', async event => {
     planFilter = '';
     byId('search').value = '';
     render();
-    status('备份已恢复并保存在当前浏览器。');
+    status(temporaryMode ? '备份已导入当前页面。此页面关闭后需重新导入。' : '备份已恢复并保存在当前浏览器。');
   } catch (error) {
     status('导入失败。' + error.message, true);
   }
@@ -757,7 +779,7 @@ byId('export').addEventListener('click', () => {
 });
 
 try {
-  savedSnapshot = localStorage.getItem(storageKey);
+  savedSnapshot = window.localStorage.getItem(storageKey);
   if (savedSnapshot !== null) state = validate(JSON.parse(savedSnapshot));
 } catch {
   loadError = true;
