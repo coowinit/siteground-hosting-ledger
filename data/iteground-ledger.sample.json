@@ -1,0 +1,348 @@
+{
+  "version": 1,
+  "accounts": [
+    {
+      "code": "SG-01",
+      "email": "coowincom@gmail.com",
+      "company": "Qingdao Barefoot Construction Material Co., Ltd.",
+      "phone": "+8618560681831",
+      "encryptedPassword": ""
+    },
+    {
+      "code": "SG-02",
+      "email": "yoast@qq.com",
+      "company": "Qingdao Barefoot Construction Material Co., Ltd.",
+      "phone": "+8618560681831",
+      "encryptedPassword": ""
+    },
+    {
+      "code": "SG-03",
+      "email": "coowinvip@gmail.com",
+      "company": "Qingdao Barefoot Construction Material Co., Ltd.",
+      "phone": "+8618560681831",
+      "encryptedPassword": ""
+    },
+    {
+      "code": "SG-04",
+      "email": "coowintop@gmail.com",
+      "company": "Qingdao Barefoot Construction Material Co., Ltd.",
+      "phone": "+8618560681831",
+      "encryptedPassword": ""
+    },
+    {
+      "code": "SG-05",
+      "email": "yangwenguan@gmail.com",
+      "company": "",
+      "phone": "+8618560681831",
+      "encryptedPassword": ""
+    },
+    {
+      "code": "SG-06",
+      "email": "yangwenguan@163.com",
+      "company": "MAOHONG",
+      "phone": "8615769270605",
+      "encryptedPassword": ""
+    }
+  ],
+  "plans": [
+    {
+      "code": "SG-01-P01",
+      "account": "SG-01",
+      "name": "GrowBig",
+      "expiry": "2027-09-19"
+    },
+    {
+      "code": "SG-02-P01",
+      "account": "SG-02",
+      "name": "GrowBig",
+      "expiry": "2027-06-29"
+    },
+    {
+      "code": "SG-03-P01",
+      "account": "SG-03",
+      "name": "GoGeek",
+      "expiry": "2027-09-08"
+    },
+    {
+      "code": "SG-04-P01",
+      "account": "SG-04",
+      "name": "GrowBig",
+      "expiry": "2027-07-10"
+    },
+    {
+      "code": "SG-05-P01",
+      "account": "SG-05",
+      "name": "StartUp",
+      "expiry": "2027-03-09"
+    },
+    {
+      "code": "SG-06-P01",
+      "account": "SG-06",
+      "name": "StartUp",
+      "expiry": "2027-11-21"
+    }
+  ],
+  "websites": [
+    {
+      "domain": "foundationdesignbuild.com",
+      "plan": "SG-01-P01"
+    },
+    {
+      "domain": "coowingroup.fr",
+      "plan": "SG-01-P01"
+    },
+    {
+      "domain": "evodek.it",
+      "plan": "SG-01-P01"
+    },
+    {
+      "domain": "coodecglobal.com",
+      "plan": "SG-01-P01"
+    },
+    {
+      "domain": "fojuindustry.com",
+      "plan": "SG-02-P01"
+    },
+    {
+      "domain": "evodekco.ca",
+      "plan": "SG-02-P01"
+    },
+    {
+      "domain": "evodekglobal.com",
+      "plan": "SG-02-P01"
+    },
+    {
+      "domain": "evodek.es",
+      "plan": "SG-02-P01"
+    },
+    {
+      "domain": "evodek.com.au",
+      "plan": "SG-02-P01"
+    },
+    {
+      "domain": "evodek-qatar.com",
+      "plan": "SG-02-P01"
+    },
+    {
+      "domain": "evodekco.com",
+      "plan": "SG-02-P01"
+    },
+    {
+      "domain": "coowin.vip",
+      "plan": "SG-03-P01"
+    },
+    {
+      "domain": "coowin.top",
+      "plan": "SG-03-P01"
+    },
+    {
+      "domain": "coowinwpc.es",
+      "plan": "SG-03-P01"
+    },
+    {
+      "domain": "coowinwpc.com",
+      "plan": "SG-03-P01"
+    },
+    {
+      "domain": "coowingroup.com",
+      "plan": "SG-03-P01"
+    },
+    {
+      "domain": "coowinmall.com",
+      "plan": "SG-03-P01"
+    },
+    {
+      "domain": "wpcdeckingboards.com",
+      "plan": "SG-03-P01"
+    },
+    {
+      "domain": "coowingroup.pt",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "coowinwpc.ae",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "coowinwpc.pt",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "evodekco.pt",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "evodekco.ae",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "coowingroup.ae",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "wpcdeckinguk.com",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "wpcdeckingsupplier.com",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "coowindeck.com",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "coowindecking.com",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "coowincomposite.com",
+      "plan": "SG-04-P01"
+    },
+    {
+      "domain": "shangyuan-tanzania.com",
+      "plan": "SG-05-P01"
+    },
+    {
+      "domain": "maohonghats.com",
+      "plan": "SG-06-P01"
+    }
+  ],
+  "payments": [
+    {
+      "date": "2025-09-19",
+      "plan": "SG-01-P01",
+      "kind": "首次购买",
+      "term": "1 年",
+      "amount": 59.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2026-07-09",
+      "plan": "SG-01-P01",
+      "kind": "续费",
+      "term": "1 年",
+      "amount": 359.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2022-06-28",
+      "plan": "SG-02-P01",
+      "kind": "首次购买",
+      "term": "1 年",
+      "amount": 80.28,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2023-06-15",
+      "plan": "SG-02-P01",
+      "kind": "续费",
+      "term": "1 年",
+      "amount": 299.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2024-04-11",
+      "plan": "SG-02-P01",
+      "kind": "续费",
+      "term": "1 年",
+      "amount": 359.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2025-03-20",
+      "plan": "SG-02-P01",
+      "kind": "续费",
+      "term": "1 年",
+      "amount": 359.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2026-03-12",
+      "plan": "SG-02-P01",
+      "kind": "续费",
+      "term": "1 年",
+      "amount": 359.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2023-09-08",
+      "plan": "SG-03-P01",
+      "kind": "首次购买",
+      "term": "1 年",
+      "amount": 80.28,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2024-06-17",
+      "plan": "SG-03-P01",
+      "kind": "续费",
+      "term": "1 年",
+      "amount": 359.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2025-06-12",
+      "plan": "SG-03-P01",
+      "kind": "续费",
+      "term": "1 年",
+      "amount": 359.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2026-07-09",
+      "plan": "SG-03-P01",
+      "kind": "续费",
+      "term": "1 年",
+      "amount": 359.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2026-08-24",
+      "plan": "SG-03-P01",
+      "kind": "其他",
+      "term": "",
+      "amount": 180,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2026-07-09",
+      "plan": "SG-04-P01",
+      "kind": "首次购买",
+      "term": "1 年",
+      "amount": 59.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2026-03-08",
+      "plan": "SG-05-P01",
+      "kind": "首次购买",
+      "term": "1 年",
+      "amount": 35.88,
+      "currency": "USD",
+      "invoice": ""
+    },
+    {
+      "date": "2026-11-20",
+      "plan": "SG-06-P01",
+      "kind": "首次购买",
+      "term": "1 年",
+      "amount": 47.88,
+      "currency": "USD",
+      "invoice": ""
+    }
+  ]
+}
